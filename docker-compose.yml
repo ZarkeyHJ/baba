@@ -1,0 +1,77 @@
+version: '3.7'
+
+services:
+  jenkins:
+    container_name: JKS
+    privileged: true
+    build: .
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 8080:8080
+      - 50000:50000
+    networks:
+      - jenqubenet
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2GB
+    restart: unless-stopped
+  
+  sonarqube:
+    container_name: SQB
+    image: sonarqube:lts
+    volumes:
+      - sonar_conf:/opt/sonarqube/conf
+      - sonar-data:/opt/sonarqube/data
+      - sonar-log:/opt/sonarqube/logs
+      - sonar-extensions:/opt/sonarqube/extensions
+      - sonar_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
+    depends_on:
+      - mysql
+    environment:
+      - SONARQUBE_JDBC_URL= jdbc:mysql://mysql:3306/sonarbd?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useConfigs=maxPerformance&useSSL=false
+      - SONARQUBE_JDBC_USERNAME= root
+      - SONARQUBE_JDBC_PASSWORD= tok10
+    ports:
+      - 9000:9000
+    networks:
+      - jenqubenet
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 3GB
+    #restart: always
+  
+  mysql:
+    container_name: BDmysql
+    image: mysql:8.0.30-debian
+    volumes:
+      - mysql:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: tok10
+      MYSQL_DATABASE: sonarbd
+    networks:
+      - jenqubenet
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1.5GB
+
+volumes:
+  jenkins-home:
+  sonar_conf:
+  sonar-data:
+  sonar-log:
+  sonar-extensions:
+  sonar_bundled-plugins:
+  mysql:
+
+networks:
+  jenqubenet:
