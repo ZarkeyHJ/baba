@@ -6,7 +6,7 @@ pipeline {
         sh(
           label: "Delete all container",
           script: """
-              docker-compose build
+              docker compose build
           """
         )
       }
@@ -16,7 +16,7 @@ pipeline {
         sh(
           label: "Delete all container",
           script: """
-              docker-compose up -d
+              docker compose up -d
           """
         )
       }
@@ -26,7 +26,7 @@ pipeline {
         sh(
           label: "Delete all container",
           script: """
-              docker-compose down
+              docker compose down
           """
         )
       }
